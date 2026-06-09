@@ -2,91 +2,69 @@ pipeline {
     agent none
 
     stages {
-
-        stage('Build') {
+        stage('Build and Test') {
             parallel {
 
-                stage('Build - Linux') {
+                stage('Linux') {
                     agent {
                         label 'linux-agent'
                     }
-                    steps {
-                        sh '''
-                            echo "Building application on Linux"
-                            # build commands here
-                        '''
-                    }
-                }
 
-                stage('Build - Mac') {
-                    agent {
-                        label 'mac-agent'
-                    }
-                    steps {
-                        sh '''
-                            echo "Building application on Mac"
-                            # build commands here
-                        '''
-                    }
-                }
-            }
-        }
+                    stages {
 
-        stage('Test') {
-            parallel {
-
-                stage('Linux Tests') {
-                    parallel {
-
-                        stage('Linux - Chrome') {
-                            agent {
-                                label 'linux-agent'
+                        stage('Build') {
+                            steps {
+                                sh '''
+                                    echo "Building on Linux"
+                                '''
                             }
+                        }
+
+                        stage('Chrome Test') {
                             steps {
                                 sh '''
                                     echo "Running Chrome tests on Linux"
-                                    # chrome test commands
                                 '''
                             }
                         }
 
-                        stage('Linux - Firefox') {
-                            agent {
-                                label 'linux-agent'
-                            }
+                        stage('Firefox Test') {
                             steps {
                                 sh '''
                                     echo "Running Firefox tests on Linux"
-                                    # firefox test commands
                                 '''
                             }
                         }
                     }
                 }
 
-                stage('Mac Tests') {
-                    parallel {
+                stage('Mac') {
+                    agent {
+                        label 'mac-agent'
+                    }
 
-                        stage('Mac - Chrome') {
-                            agent {
-                                label 'mac-agent'
-                            }
+                    stages {
+
+                        stage('Build') {
                             steps {
                                 sh '''
-                                    echo "Running Chrome tests on Mac"
-                                    # chrome test commands
+                                    echo "Building on Mac"
                                 '''
                             }
                         }
 
-                        stage('Mac - Firefox') {
-                            agent {
-                                label 'mac-agent'
+                        stage('Chrome Test') {
+                            steps {
+                                sh '''
+                                    echo "Running Chrome tests on Mac"
+                                '''
                             }
+                        }
+
+                        stage('Firefox Test') {
                             steps {
                                 sh '''
                                     echo "Running Firefox tests on Mac"
-                                    # firefox test commands
                                 '''
                             }
                         }
