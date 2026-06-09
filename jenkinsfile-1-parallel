@@ -2,71 +2,33 @@ pipeline {
     agent none
 
     stages {
-        stage('Build and Test') {
-            parallel {
+        stage('Build and Test Matrix') {
+            matrix {
 
-                stage('Linux') {
-                    agent {
-                        label 'linux-agent'
+                axes {
+                    axis {
+                        name 'OS'
+                        values 'Linux', 'Mac'
                     }
-
-                    stages {
-
-                        stage('Build') {
-                            steps {
-                                sh '''
-                                    echo "Building on Linux"
-                                '''
-                            }
-                        }
-
-                        stage('Chrome Test') {
-                            steps {
-                                sh '''
-                                    echo "Running Chrome tests on Linux"
-                                '''
-                            }
-                        }
-
-                        stage('Firefox Test') {
-                            steps {
-                                sh '''
-                                    echo "Running Firefox tests on Linux"
-                                '''
-                            }
-                        }
+                    axis {
+                        name 'Mobile'
+                        values 'Android', 'IOS'
                     }
                 }
 
-                stage('Mac') {
-                    agent {
-                        label 'mac-agent'
+                agent any
+
+                stages {
+
+                    stage('Build') {
+                        steps {
+                            echo "Building on ${OS}"
+                        }
                     }
 
-                    stages {
-
-                        stage('Build') {
-                            steps {
-                                sh '''
-                                    echo "Building on Mac"
-                                '''
-                            }
-                        }
-
-                        stage('Chrome Test') {
-                            steps {
-                                sh '''
-                                    echo "Running Chrome tests on Mac"
-                                '''
-                            }
-                        }
-
-                        stage('Firefox Test') {
-                            steps {
-                                sh '''
-                                    echo "Running Firefox tests on Mac"
-                                '''
-                            }
+                    stage('Test') {
+                        steps {
+                            echo "Running ${Mobile} tests on ${OS}"
                         }
                     }
                 }
