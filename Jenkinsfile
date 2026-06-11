@@ -56,6 +56,7 @@ pipeline {
             steps {
                 echo 'Deploying application to Production...'
                 // sh './deploy-prod.sh'
+                // Production deployment
             }
         }
     }
