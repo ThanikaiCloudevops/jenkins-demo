@@ -42,6 +42,7 @@ pipeline {
                 echo 'Deploying to UAT environment...'
                 // sh './deploy-uat.sh'
                 // Deploy to UAT environment
+                // sh 'mvn verify -P uat' // Run UAT tests
             }
         }
 
