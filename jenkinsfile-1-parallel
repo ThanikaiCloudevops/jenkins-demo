@@ -6,6 +6,7 @@ pipeline {
             steps {
                 echo 'Checking out source code...'
                 // checkout scm
+                // Checking Trigger Webhook
             }
         }
 
