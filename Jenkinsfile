@@ -37,7 +37,7 @@ pipeline {
             }
         }
 
-        stage('UAT Deployment') {
+        // stage('UAT Deployment') {
         //     steps {
         //         echo 'Deploying to UAT environment...'
         //         // sh './deploy-uat.sh'
