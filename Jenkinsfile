@@ -38,13 +38,13 @@ pipeline {
         }
 
         stage('UAT Deployment') {
-            steps {
-                echo 'Deploying to UAT environment...'
-                // sh './deploy-uat.sh'
-                // Deploy to UAT environment
-                // sh 'mvn verify -P uat' // Run UAT tests
-            }
-        }
+        //     steps {
+        //         echo 'Deploying to UAT environment...'
+        //         // sh './deploy-uat.sh'
+        //         // Deploy to UAT environment
+        //         // sh 'mvn verify -P uat' // Run UAT tests
+        //     }
+        // }
 
         // stage('UAT Approval') {
         //     steps {
