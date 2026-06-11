@@ -46,13 +46,13 @@ pipeline {
             }
         }
 
-        stage('UAT Approval') {
-            steps {
-                timeout(time: 2, unit: 'DAYS') {
-                    input message: 'Approve deployment after UAT testing?'
-                }
-            }
-        }
+        // stage('UAT Approval') {
+        //     steps {
+        //         timeout(time: 2, unit: 'DAYS') {
+        //             input message: 'Approve deployment after UAT testing?'
+        //         }
+        //     }
+        // }
 
         stage('Production Deployment') {
             steps {
