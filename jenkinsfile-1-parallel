@@ -1,38 +1,43 @@
 pipeline {
-    agent none
+    agent any
 
     stages {
-        stage('Build and Test Matrix') {
-            matrix {
-
-                axes {
-                    axis {
-                        name 'OS'
-                        values 'Linux', 'Mac'
-                    }
-                    axis {
-                        name 'Mobile'
-                        values 'Android', 'IOS'
-                    }
-                }
-
-                agent any
-
-                stages {
-
-                    stage('Build') {
-                        steps {
-                            echo "Building on ${OS}"
-                        }
-                    }
-
-                    stage('Test') {
-                        steps {
-                            echo "Running ${Mobile} tests on ${OS}"
-                        }
-                    }
-                }
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                // checkout scm
             }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building application...'
+                // sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                // sh 'mvn test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                // sh './deploy.sh'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
