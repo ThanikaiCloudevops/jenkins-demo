@@ -41,6 +41,7 @@ pipeline {
             steps {
                 echo 'Deploying to UAT environment...'
                 // sh './deploy-uat.sh'
+                // Deploy to UAT environment
             }
         }
 
