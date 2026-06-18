@@ -1,0 +1,65 @@
+@Library('my-shared-library') _
+
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Start') {
+            steps {
+                echo "Pipeline Started"
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                script {
+                    checkoutCode()
+                }
+            }
+        }
+
+        stage('Sonar') {
+            steps {
+                script {
+                    sonarScan()
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    dockerBuild()
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                script {
+                    dockerPush()
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    deployApp()
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline Completed Successfully"
+        }
+
+        failure {
+            echo "Pipeline Failed"
+        }
+    }
+}
