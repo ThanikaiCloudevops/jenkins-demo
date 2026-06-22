@@ -1,0 +1,20 @@
+pipeline {
+    agent any 
+
+    environment {
+        GIT_CREDENTIALS_ID = 'git-credentials-id'
+        GIT_REPO_URL = 'git@github.com:ThanikaiCloudevops/sample-application.git'
+    }
+
+    stages{
+        stage("Checkout from GIT Repository"){
+            steps{
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/development']],
+                    userRemoteConfigs: [[url: GIT_REPO_URL , credentialsId: GIT_CREDENTIALS_ID]]
+                ])
+            }
+        }
+    }
+}
