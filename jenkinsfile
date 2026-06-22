@@ -1,19 +1,70 @@
 pipeline {
-    agent any 
+    agent any
 
     environment {
         GIT_CREDENTIALS_ID = 'git-credentials-id'
         GIT_REPO_URL = 'https://github.com/ThanikaiCloudevops/sample-application.git'
     }
 
-    stages{
-        stage("Checkout from GIT Repository"){
-            steps{
+    stages {
+
+        stage('Checkout from GIT Repository') {
+            steps {
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/development']],
-                    userRemoteConfigs: [[url: GIT_REPO_URL , credentialsId: GIT_CREDENTIALS_ID]]
+                    userRemoteConfigs: [[
+                        url: GIT_REPO_URL,
+                        credentialsId: GIT_CREDENTIALS_ID
+                    ]]
                 ])
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t sample-application:latest .'
+                }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'docker-credentials-id',
+                            usernameVariable: 'DOCKERHUB_USERNAME',
+                            passwordVariable: 'DOCKERHUB_PASSWORD'
+                        )
+                    ]) {
+                        sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    sh 'docker tag sample-application:latest thanikai1/sample-application:latest'
+                    sh 'docker push thanikai1/sample-application:latest'
+                }
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                script {
+                    sh '''
+                        docker rm -f sample-application || true
+                        docker run -d \
+                            --name sample-application \
+                            -p 3000:3000 \
+                            thanikai1/sample-application:latest
+                    '''
+                }
             }
         }
     }
