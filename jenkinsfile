@@ -1,70 +1,120 @@
 pipeline {
     agent any
 
+    options {
+        buildDiscarder(logRotator(
+            numToKeepStr: '20',
+            daysToKeepStr: '30'
+        ))
+
+        disableConcurrentBuilds()
+        timestamps()
+        ansiColor('xterm')
+
+        timeout(
+            time: 30,
+            unit: 'MINUTES'
+        )
+    }
+
+    parameters {
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Image tag to build'
+        )
+    }
+
     environment {
-        GIT_CREDENTIALS_ID = 'git-credentials-id'
-        GIT_REPO_URL = 'https://github.com/ThanikaiCloudevops/sample-application.git'
+        APP_NAME = 'sample-application'
+        GIT_URL = 'git@github.com:ThanikaiCloudevops/sample-application.git'
+        GIT_CREDENTIALS_ID = 'github_id'
+        DOCKER_CREDENTIALS_ID = 'docker_cred_id'
+        DOCKER_REGISTRY = 'thanikai1/sample-application'
+        IMAGE_TAG = "${params.IMAGE_TAG}"
+        FULL_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${IMAGE_TAG}"
+        CONTAINER_NAME = 'sample-application-container'
+        APP_PORT = '3000'
     }
 
     stages {
 
-        stage('Checkout from GIT Repository') {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Checkout Code') {
             steps {
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/development']],
                     userRemoteConfigs: [[
-                        url: GIT_REPO_URL,
-                        credentialsId: GIT_CREDENTIALS_ID
+                        url: env.GIT_URL,
+                        credentialsId: env.GIT_CREDENTIALS_ID
                     ]]
                 ])
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker') {
             steps {
-                script {
-                    sh 'docker build -t sample-application:latest .'
-                }
+                sh """
+                    docker build -t ${FULL_IMAGE_NAME} .
+                """
             }
         }
 
         stage('Docker Login') {
             steps {
-                script {
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'docker-credentials-id',
-                            usernameVariable: 'DOCKERHUB_USERNAME',
-                            passwordVariable: 'DOCKERHUB_PASSWORD'
-                        )
-                    ]) {
-                        sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
-                    }
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: env.DOCKER_CREDENTIALS_ID,
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh """
+                        echo "\$DOCKER_PASS" | docker login \
+                        -u "\$DOCKER_USER" \
+                        --password-stdin
+                    """
                 }
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Docker Push') {
             steps {
-                script {
-                    sh 'docker tag sample-application:latest thanikai1/sample-application:latest'
-                    sh 'docker push thanikai1/sample-application:latest'
-                }
+                sh """
+                    docker push ${FULL_IMAGE_NAME}
+                """
+            }
+        }
+
+        stage('Remove Existing Container') {
+            steps {
+                sh """
+                    docker rm -f ${CONTAINER_NAME} || true
+                """
             }
         }
 
         stage('Deploy Container') {
             steps {
-                script {
-                    sh '''
-                        docker rm -f sample-application || true
-                        docker run -d \
-                            --name sample-application \
-                            -p 3000:3000 \
-                            thanikai1/sample-application:latest
-                    '''
-                }
+                sh """
+                    docker run -d \
+                    --name ${CONTAINER_NAME} \
+                    -p ${APP_PORT}:3000 \
+                    --restart unless-stopped \
+                    ${FULL_IMAGE_NAME}
+                """
+            }
+        }
+
+        stage('Docker Cleanup') {
+            steps {
+                sh 'docker image prune -f'
             }
         }
     }
