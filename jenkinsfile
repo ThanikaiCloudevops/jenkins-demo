@@ -30,9 +30,10 @@ pipeline {
         GIT_URL = 'https://github.com/ThanikaiCloudevops/sample-application.git'
         GIT_CREDENTIALS_ID = 'github_id'
         DOCKER_CREDENTIALS_ID = 'docker_cred_id'
-        DOCKER_REGISTRY = 'thanikai1/sample-application'
+        DOCKER_REGISTRY = 'thanikai1'
+        FULL_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${IMAGE_TAG}"
         IMAGE_TAG = "${params.IMAGE_TAG}"
-        FULL_IMAGE_NAME = "${APP_NAME}:${IMAGE_TAG}"
+        // FULL_IMAGE_NAME = "${APP_NAME}:${IMAGE_TAG}"
         CONTAINER_NAME = 'sample-application-container'
         APP_PORT = '3000'
     }
