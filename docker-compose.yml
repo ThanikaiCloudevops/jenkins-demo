@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  sample-app:
+    image: thanikai1/sample-application:latest
+    container_name: sample-application-dashboard
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      NODE_ENV: UAT 
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "5"
